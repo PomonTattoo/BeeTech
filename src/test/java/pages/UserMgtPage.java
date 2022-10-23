@@ -17,21 +17,6 @@ public class UserMgtPage {
     @FindBy(id = "practice-form")
     public WebElement loginBtn;
 
-    @FindBy(xpath = "//a[text()='Access DB']")
-    public WebElement accessDBBtn;
-
-    @FindBy(id = "Firstname")
-    public WebElement firstName;
-
-    @FindBy(id = "Lastname")
-    public WebElement lastName;
-
-    @FindBy(id = "Phonenumber")
-    public WebElement phoneNumber;
-
-    @FindBy(id = "Email")
-    public WebElement email;
-
     @FindBy(id = "Select-role")
-    public WebElement role;
+    public WebElement selectRole;
 }

@@ -1,10 +1,14 @@
 package step_definitions;
 
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import org.openqa.selenium.By;
 import pages.CommonPage;
 import pages.UserMgtPage;
 import utils.BrowserUtils;
+
+import java.util.List;
+import java.util.Map;
 
 
 public class UserMgtSteps implements CommonPage {
@@ -25,36 +29,36 @@ public class UserMgtSteps implements CommonPage {
         BrowserUtils.assertTrue(BrowserUtils.isEnabled(page.loginBtn));
     }
 
-    @Then("Verify First Name input field is displayed")
-    public void verify_first_name_input_field_is_displayed() {
+    @Then("Verify {string} input field is displayed")
+    public void verifyInputFieldIsDisplayed(String inputField) {
         BrowserUtils.isDisplayed(
                 BrowserUtils.getDriver().findElement(
-                        By.xpath(String.format(XPATH_TEMPLATE_INPUT_FIELD, "First Name"))
+                        By.xpath(String.format(XPATH_TEMPLATE_INPUT_FIELD, inputField))
                 )
         );
     }
-    @Then("Verify Last Name input field is displayed")
-    public void verify_last_name_input_field_is_displayed() {
-        BrowserUtils.isDisplayed(
-                BrowserUtils.getDriver().findElement(
-                        By.xpath(String.format(XPATH_TEMPLATE_INPUT_FIELD, "Last Name"))
-                )
-        );
+
+    @Then("Verify following input fields are displayed:")
+    public void verify_following_input_fields_are_displayed(List<String> dataTable) {
+        for(String each: dataTable){
+            BrowserUtils.isDisplayed(
+                    BrowserUtils.getDriver().findElement(
+                            By.xpath(String.format(XPATH_TEMPLATE_INPUT_FIELD, each))
+                    )
+            );
+        }
     }
-    @Then("Verify Phone Number input field is displayed")
-    public void verify_phone_number_input_field_is_displayed() {
-        BrowserUtils.isDisplayed(
-                BrowserUtils.getDriver().findElement(
-                        By.xpath(String.format(XPATH_TEMPLATE_INPUT_FIELD, "Phone Number"))
-                )
-        );
-    }
-    @Then("Verify Email input field is displayed")
-    public void verify_email_input_field_is_displayed() {
-        BrowserUtils.isDisplayed(
-                BrowserUtils.getDriver().findElement(
-                        By.xpath(String.format(XPATH_TEMPLATE_INPUT_FIELD, "E-mail"))
-                )
-        );
+
+    @When("I fill out user registration form with following info:")
+    public void iFillOutUserRegistrationFormWithFollowingInfo(Map<String, String> map) {
+        for(String key: map.keySet()){
+            if (key.equalsIgnoreCase("role")){
+                BrowserUtils.selectByVisibleText(page.selectRole, map.get(key));
+            }else {
+                BrowserUtils.sendKeys(BrowserUtils.getDriver().findElement(By.xpath(
+                        String.format(XPATH_TEMPLATE_INPUT_FIELD, key)
+                )), map.get(key));
+            }
+        }
     }
 }
