@@ -7,10 +7,14 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 public class BrowserUtils {
@@ -42,22 +46,40 @@ public class BrowserUtils {
     }
 
     private static void initializeDriver(String browser){
-        switch (browser){
-            case "chrome":
-                WebDriverManager.chromedriver().setup();
-                driver = new ChromeDriver();
-                break;
-            case "firefox":
-                WebDriverManager.firefoxdriver().setup();
-                driver = new FirefoxDriver();
-                break;
-            default:
-                System.out.println("Invalid browser name");
+            if (ConfigReader.readProperty("runInSaucelabs").equalsIgnoreCase("true")){
+            String sauceUsername = "pomontattoo";
+            String sauceKey = "e925b9d4-0d83-4c46-a339-b948828a1d05";
+
+            String sauceURL = "https://" + sauceUsername + ":" + sauceKey + "@ondemand.us-west-1.saucelabs.com:443/wd/hub";
+
+                try{
+                    DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+                    capabilities.setCapability("version", "107");
+                    capabilities.setCapability("platform", "Windows 11");
+                    driver = new RemoteWebDriver(new URL(sauceURL), capabilities);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+            }else {
+                switch (browser){
+                    case "chrome":
+                        WebDriverManager.chromedriver().setup();
+                        driver = new ChromeDriver();
+                        break;
+                    case "firefox":
+                        WebDriverManager.firefoxdriver().setup();
+                        driver = new FirefoxDriver();
+                        break;
+                    default:
+                        System.out.println("Invalid browser name");
+                }
+            }
+
+            driver.manage().window().maximize();
+            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+            driver.get(ConfigReader.readProperty("url"));
         }
-        driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-        driver.get(ConfigReader.readProperty("url"));
-    }
+
 
     public static void waitForElementClickability(WebElement element){
         WebDriverWait wait = new WebDriverWait(driver, 10);
@@ -90,6 +112,7 @@ public class BrowserUtils {
                     js.executeScript("arguments[0].setAttribute('style', arguments[1]);", element, "color: black;" +
                             "border: 3px solid red; background: yellow");
                     //TODO:apply report screenshot here
+                    CucumberLogUtils.logInfo(element.toString(), ConfigReader.readProperty("takeScreenshot"));
                 } else {
                     sleep(600);
                     js.executeScript("arguments[0].setAttribute('style', arguments[1]);", element, "");
@@ -99,6 +122,7 @@ public class BrowserUtils {
             }
         }
     }
+
 
     public static void sendKeys(WebElement element, String inputText){
         //TODO: apply report -> logInfo("Entered the text ", element);
